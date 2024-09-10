@@ -8,6 +8,20 @@
       "when": 1725972935985,
       "tag": "0000_lying_rocket_racer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1725990421986,
+      "tag": "0001_calm_golden_guardian",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1725990505402,
+      "tag": "0002_cool_carlie_cooper",
+      "breakpoints": true
     }
   ]
 }
