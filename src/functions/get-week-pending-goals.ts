@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { db } from '../db'
 import { goalCompletions, goals } from '../db/schema'
-import { count, lte, gte, and, eq, sql } from 'drizzle-orm'
+import { and, count, eq, gte, lte, sql } from 'drizzle-orm'
 
 export async function getWeekPendingGoals() {
   const firstDayOfWeek = dayjs().startOf('week').toDate()
@@ -13,10 +13,10 @@ export async function getWeekPendingGoals() {
         id: goals.id,
         title: goals.title,
         desiredWeeklyFrequency: goals.desiredWeeklyFrequency,
-        createAt: goals.createAt,
+        createdAt: goals.createdAt,
       })
       .from(goals)
-      .where(lte(goals.createAt, lastDayOfWeek))
+      .where(lte(goals.createdAt, lastDayOfWeek))
   )
 
   const goalCompletionCounts = db.$with('goal_completion_counts').as(
@@ -28,8 +28,8 @@ export async function getWeekPendingGoals() {
       .from(goalCompletions)
       .where(
         and(
-          gte(goalCompletions.createAt, firstDayOfWeek),
-          lte(goalCompletions.createAt, lastDayOfWeek)
+          gte(goalCompletions.createdAt, firstDayOfWeek),
+          lte(goalCompletions.createdAt, lastDayOfWeek)
         )
       )
       .groupBy(goalCompletions.goalId)
@@ -41,19 +41,15 @@ export async function getWeekPendingGoals() {
       id: goalsCreatedUpToWeek.id,
       title: goalsCreatedUpToWeek.title,
       desiredWeeklyFrequency: goalsCreatedUpToWeek.desiredWeeklyFrequency,
-      completionCount: sql`
-      COALESCE(${goalCompletionCounts.completionCount}, 0)
+      completionCount: sql /*sql*/`
+        COALESCE(${goalCompletionCounts.completionCount}, 0)
       `.mapWith(Number),
     })
     .from(goalsCreatedUpToWeek)
     .leftJoin(
       goalCompletionCounts,
-      eq(goalCompletionCounts.goalId, goalsCreatedUpToWeek)
+      eq(goalCompletionCounts.goalId, goalsCreatedUpToWeek.id)
     )
 
-  return {
-    pendingGoals,
-  }
+  return { pendingGoals }
 }
-
-//01:19:05 aula
